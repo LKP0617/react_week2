@@ -5,6 +5,8 @@ function App() {
   const [iscontent, setContent] = useState(false);
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(); // 單一產品的狀態
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
+  const API_PATH = import.meta.env.VITE_API_PATH;
 
   const [account, setAccount] = useState({
     "username": "example@test.com",
@@ -26,18 +28,25 @@ function App() {
     // console.log(account)
     axios.post(`${import.meta.env.VITE_BASE_URL}/v2/admin/signin`, account)
       .then((res) => {
-        const { token , expired} = res.data;
+        const { token, expired } = res.data;
         // console.log(token, expired)
         document.cookie = `itToken=${token}; expires=${new Date(expired)}`;
 
         axios.defaults.headers.common['Authorization'] = token;
 
-        axios.get(`${import.meta.env.VITE_BASE_URL}/v2/api/${import.meta.env.VITE_API_PATH}/admin/products`)
+        axios.get(`${BASE_URL}/v2/api/${API_PATH}/admin/products`)
           .then((res) => setProducts(res.data.products))
           .catch((error) => console.error(error))
-        setContent(true)})
+        setContent(true)
+      })
       .catch((error) => alert('error'))
   };
+
+  const checkUserLogin = () => {
+    axios.post(`${BASE_URL}/v2/api/user/check`)
+      .then((res) => alert('使用者已登入'))
+      .catch((error) => console.error('error'))
+  }
 
   return (
     <>
@@ -46,7 +55,10 @@ function App() {
           (<div className="container">
             <div className="row mt-5">
               <div className="col-md-6">
-                <h2 className="fw-bolder">產品列表</h2>
+                <div className='d-flex gap-3 '>
+                  <h2 className="fw-bolder">產品列表</h2>
+                  <button type="button" className='btn btn-success btn-sm' onClick={checkUserLogin}>確認是否登入</button>
+                </div>
                 <table className="table">
                   <thead>
                     <tr>
